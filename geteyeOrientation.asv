@@ -1,0 +1,75 @@
+function [eyeOrientationX eyeOrientationY]  = geteyeOrientation(im,eyeBbox)
+%this function will get eye orientation for given eye (in bbox) and image
+%first it will crop the eye from the image according to bbox
+%than it will find the number of pixel difference of the pupile from the left most primiter of the eye (X value
+%and upper primiter of the eye (Y value)
+
+%for debug 
+%eyeBbox = bbox(4,:)
+
+eyeBboxRangeX = eyeBbox(1): eyeBbox(1)+eyeBbox(3);
+eyeBboxRangeY = eyeBbox(2):eyeBbox(2)+eyeBbox(4);
+
+eyeIm = im(eyeBboxRangeY,eyeBboxRangeX,:);
+%imshow(eyeIm)
+
+%step 0 - identify the sclera and pupile using segmentation, histogram (sclera should be whitest bunch of pixels) and
+%turn to BW
+
+eyeImGray = rgb2gray(eyeIm);
+
+[~,threshold] = edge(eyeImGray,'sobel');
+fudgeFactor = 0.5;
+eyeEdges = edge(eyeImGray,'sobel',threshold * fudgeFactor);
+%imshow(eyeEdges);
+Disk3 = strel('disk',3);
+
+tempEdges = imdilate(eyeEdges,Disk3);
+tempEdges = imerode(tempEdges,Disk3);
+edgesFilled = imfill(tempEdges,'holes');
+%imshow(tempEdges)
+
+connectComp = bwconncomp(edgesFilled,4);
+
+%get largest object - the sclera&pupile
+numPixels = cellfun(@numel,connectComp.PixelIdxList);
+[biggest,idx] = max(numPixels);
+
+scleraPupileInd = connectComp.PixelIdxList{idx};
+
+scleraPupile = zeros(size(eyeImGray));
+scleraPupile(scleraPupileInd) = eyeImGray(scleraPupileInd);
+
+%imshow(scleraPupile,[])
+
+%% saperate pupile from sclera
+
+%get sclera length
+scleraCol = sum(scleraPupile,1);
+scleraLen = find(scleraCol>0,1,'last') - find(scleraCol>0,1);
+
+irisRadi = floor((scleraLen/3 -1)/2); %pupile length is around one third of sclera. minus one is to be lower than that
+DiskIris = strel('disk',irisRadi);
+
+
+%{
+pupileInd = scleraPupile>0 & scleraPupile<52;
+pupileOnly = zeros(size(eyeImGray));
+pupileOnly(pupileInd) = scleraPupile(pupileInd);
+%} 
+imshow(pupileOnly,[])
+
+
+
+%eyeHist = histogram(eyeImGray(:),255);
+
+%step 1 - isolate pupile/iris using morphological actions /other actions
+%imshow(imfill(eyeIm));
+
+%step 2 - remove pupile from sclera to get only white sclera
+
+%step 3 - get contour of sclera
+
+%step 4 - calculate middle of pupile from left most point of contour
+
+%step 5 = calculate middle of pupile from upper most point of contour
