@@ -34,7 +34,6 @@ label = '';
 gazeRadius = 10;
 if gazeCord(1) ~= notValid
     if markLine  %insert line on screen
-        %gazeOnScreen = insertObjectAnnotation(screenIm,'rectangle',linePosition,label,,'LineWidth',3);
         gazeOnScreen = insertShape(screenIm,'FilledRectangle',linePosition);
         
     else %insert gaze on screen
@@ -44,7 +43,6 @@ if gazeCord(1) ~= notValid
 else %not valid gaze coords
     gazeOnScreen = screenIm; 
 end %if gazecoord valid
-%imshow(gazeOnScreen)
 
 %% insert bbox on head image
 headBbox = bbox(headInd,:);
@@ -55,19 +53,16 @@ combinedBbox = [headBbox; leftEyeBbox; rightEyeBbox];
 
 if headBbox(1) ~= notValidBbox
     personBboxIm = insertObjectAnnotation(headIm,'rectangle',headBbox,label,'LineWidth',3);
-    %imshow(personBboxIm)
 else
     personBboxIm = headIm;
 end
 
 if leftEyeBbox(1) ~= notValidBbox
     personBboxIm = insertObjectAnnotation(personBboxIm,'rectangle',leftEyeBbox,label,'LineWidth',3);
-    %imshow(personBboxIm)
 end
 
 if rightEyeBbox(1) ~= notValidBbox
     personBboxIm = insertObjectAnnotation(personBboxIm,'rectangle',rightEyeBbox,label,'LineWidth',3);
-    %imshow(personBboxIm)
 end
 
 figure(1)
@@ -130,7 +125,6 @@ if writeOutVideo
     
     
     
-    %imshow(joinedIm)
     writeVideo(outMovH,joinedIm);
     
 end

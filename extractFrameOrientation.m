@@ -7,11 +7,7 @@ function [frameOrientation bbox] = extractFrameOrientation(im,globalParams)
  bbox = detectFeature(im,globalParams);
  notValid = globalParams.cantFindOrientationValue;
  notValidBbox = globalParams.cantFindBboxValue;
- %{
- imAnotate = insertObjectAnnotation(im,'rectangle',bbox,'');   
- imshow(imAnotate)
- %}
-
+ 
  %detect vertical and horizontal orientation of face, right eye and left eye
  %the orentation is defined as location of center of face bbox
  %for eye it is defined as number of pixels the pupile is away from outer point of eye bbox

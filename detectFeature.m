@@ -38,11 +38,6 @@ bbox = zeros(numDetectors,4);
      bbox(1,:) = tempBbox(1,:); %if we have many fea
      roi = bbox(1,:); %our region of interest is the face, consider enlrage it a little
      
-     %{
-     tempIm = insertObjectAnnotation(im,'rectangle',tempBbox,'');   
-     imshow(tempIm)
-     %}
-
      for featureInd = 2:numDetectors
          tempBbox = step(detectors{featureInd},im,roi);
          if isempty(tempBbox)
@@ -53,16 +48,7 @@ bbox = zeros(numDetectors,4);
                 %prone false detrection, for now, tack the first object
                 bbox(featureInd,:) = tempBbox(1,:); %if we have many features, how do we choose
              end
-             %{
-             tempIm = insertObjectAnnotation(im,'rectangle',tempBbox,'');   
-             imshow(tempIm)
-
-             tempIm = insertObjectAnnotation(im,'rectangle',tempBbox(1,:),'');   
-             imshow(tempIm)
-
-              tempIm = insertObjectAnnotation(im,'rectangle',bbox,'');   
-             imshow(tempIm)
-             %}
+             
 
              if featureInd == leftEyeInd || featureInd == rightEyeInd %eyes most times detect more then 2 objects
                  if size(tempBbox,1) >2 %we detect more than 2 "eyes"
@@ -81,7 +67,6 @@ bbox = zeros(numDetectors,4);
                              isSameLine(nInd,mInd) = abs(yValue(nInd)-yValue(mInd))<=pixelInSameLine;
                          end
                      end
-                     %isSameLine = isSameLine-eye(numObj); %remove always '1' diag
                      
                      %find 2 or more objects within same line
                      [firstObj secondObj] = find(isSameLine);
@@ -109,24 +94,13 @@ bbox = zeros(numDetectors,4);
                      %choose left for left eye etc
                  if featureInd == leftEyeInd %we are detecting left eye
                      bbox(featureInd,:) = tempBbox(sortIndLeft(1),:);
-                     %{
-                     tempIm = insertObjectAnnotation(im,'rectangle',tempBbox(sortIndLeft(1),:),'');   
-                     imshow(tempIm)
-                     %}
+                     
                  else %right eye
                      if length(tempBbox(:,1))>1
                         bbox(featureInd,:) = tempBbox(sortIndLeft(2),:);
-                        %{
-                        tempIm = insertObjectAnnotation(im,'rectangle',tempBbox(sortIndLeft(2),:),'');   
-                        imshow(tempIm)
-                        %}
+                        
                      else %only one item
                         bbox (featureInd,:)= tempBbox;
-                        %{
-                        tempIm = insertObjectAnnotation(im,'rectangle',tempBbox,'');   
-                        imshow(tempIm)
-                        %}
-                        
                         
                      end
 
@@ -136,19 +110,12 @@ bbox = zeros(numDetectors,4);
 
 
 
-         %{
-         tempIm = insertObjectAnnotation(im,'rectangle',tempBbox,'');   
-         imshow(tempIm)
-         %}
+         
          end %if is empty
 
      end %for num of detectors
 
-     %{
-
-     imAnotate = insertObjectAnnotation(im,'rectangle',bbox,'');   
-     imshow(imAnotate)
-     %}
+     
  end %if there is atleast 1 face
 end %function
  

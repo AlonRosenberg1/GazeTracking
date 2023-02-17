@@ -3,4 +3,3 @@ function screenIm = getScreenSnapshot()
 %currently it just read the screen image
 
 screenIm = imread('twoLinesTestPic.png');
-%imshow(screenIm)

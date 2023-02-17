@@ -17,7 +17,6 @@ if gazeCord(1) ~= notValid
 else
     gazeOnScreen = screenIm; 
 end
-%imshow(gazeOnScreen)
 
 
 

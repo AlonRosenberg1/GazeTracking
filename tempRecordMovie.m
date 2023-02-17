@@ -2,7 +2,6 @@ close all
 clear all
 
 testVideo = VideoWriter('testVideo.mp4');
-%testVideo = VideoWriter('testVideo.mp4','Archival');
 open(testVideo);
 
 numWebCams = length(webcamlist);

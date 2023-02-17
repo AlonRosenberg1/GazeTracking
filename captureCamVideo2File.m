@@ -43,14 +43,6 @@ notValid = globalParams.cantFindBboxValue;
 
 
 %% file names prefix
-%{
-for ind = 1:numEyesCalibPoints
-    calibrationImFileNameEyesOnly{ind} = 'calibration\calibration_points_printscreen_eyesOnly.png';
-end
-for ind = 1:numHeadCalibPoints
-    calibrationImFileNameHeadOnly{ind} = 'calibration\calibration_points_printscreen_headOnly.png';
-end
-%}
 calibrationImFileNameEyesOnly = 'calibration\calibration_points_printscreen_eyesOnly';
 calibrationImFileNameHeadOnly = 'calibration\calibration_points_printscreen_headOnly';
 testInFileName = 'calibration\test';
@@ -64,7 +56,7 @@ errorInputKey = 'calibration\errorInputKey.png';
 numTest =globalParams.numTestPoints;
 
 
-%% find best cam (with highest resoultion)
+%% find best cam (with highest resoultion), if several cameras are installed
 %{
 numWebCams = length(webcamlist);
 maxRes = 0;
@@ -113,7 +105,6 @@ if capturePicsAndNotVideo %we caputre single snapshoot
         waitfor(buttonH,'Value');
     
         %pause;
-        %inputkey = get(gcf, 'CurrentCharacter');
         if buttonH.Value == 3
             inputkey ='y';
         else
@@ -130,14 +121,11 @@ if capturePicsAndNotVideo %we caputre single snapshoot
         end
     end
     %% head only movement
-    %hFig = figure('units','normalized','outerposition',[0 0 1 1]); %make the figure max size
     imshow(instructions_headOnly); %instruct to press any key to dismiss it and when looking at tarket
     
     nextButtonPos = [0.4 0.0 0.1 0.1];
-    %netxButtonH = uicontrol('Style','togglebutton','String','Next','Position', nextButtonPos);
     netxButtonH = uicontrol('Style','togglebutton','String','Next','Units','normalized','Position', nextButtonPos);
     
-    %pause; %wait for any keyboard input to contiue
     waitfor(netxButtonH,'value');
     
     for ind = 1:numHeadCalibPoints
@@ -147,7 +135,6 @@ if capturePicsAndNotVideo %we caputre single snapshoot
 
             %file name of pic with only the relevant target.
             calibName = sprintf('%s%s%s',calibrationImFileNameHeadOnly,suffixName,calibFileType);
-            %calibName = sprintf('%s%s',calibrationImFileNameHeadOnly,calibFileType); %now we use one file for all targets
 
             imshow(calibName,'Border','tight')
 
@@ -192,12 +179,10 @@ if capturePicsAndNotVideo %we caputre single snapshoot
     end %for 
     
     %% eyes only calibration
-    %hFig = figure('units','normalized','outerposition',[0 0 1 1]); %make the figure max size
     imshow(instructions_EyesOnly); %instruct to press any key to dismiss it and when looking at tarket
     nextButtonPos = [0.4 0.0 0.1 0.1];
     netxButtonH = uicontrol('Style','togglebutton','String','Next','Units','normalized','Position', nextButtonPos);
     waitfor(netxButtonH,'value');
-    %pause; %wait for any keyboard input to contiue
     for ind = 1:numEyesCalibPoints
         isOk = 0;
         while ~isOk
@@ -205,7 +190,6 @@ if capturePicsAndNotVideo %we caputre single snapshoot
 
             %file name of pic with only the relevant target.
             calibName = sprintf('%s%s%s',calibrationImFileNameEyesOnly,suffixName,calibFileType);
-            %calibName = sprintf('%s%s',calibrationImFileNameEyesOnly,calibFileType); %now we use one file for all targets
 
             imshow(calibName,'Border','tight')
 
@@ -226,7 +210,6 @@ if capturePicsAndNotVideo %we caputre single snapshoot
             netxButtonH = uicontrol('Style','togglebutton','String','Next','Units','normalized','Position', nextButtonPos);
             waitfor(netxButtonH,'value');
 
-            %pause; %wait for user input he is gazing the target
             im = snapshot(cam);
             
             %% check if eyes and face were identifed correctly
@@ -257,7 +240,6 @@ if capturePicsAndNotVideo %we caputre single snapshoot
 
             %file name of pic with only the relevant target.
             calibName = sprintf('%s%s%s',testInFileName,suffixName,calibFileType);
-            %calibName = sprintf('%s%s',testInFileName,calibFileType); %now we use one file for all targets
 
             imshow(calibName,'Border','tight')
 
@@ -287,24 +269,18 @@ else %we need to capture video
 %frameCount = 240;
 
     camVidWriter = VideoWriter('cam.avi');
-    %screenVidWriter = VideoWriter('screen.avi');
 
     open(camVidWriter);
-    %open(screenVidWriter);
 
     frameCount = 100;
-    tic
     for index = 1:frameCount
         % Acquire frame for processing
         camIm = snapshot(cam);
-        %screenIm = screencapture(0,screenSize);
         % Write frame to video
         writeVideo(camVidWriter,camIm);
-        %writeVideo(screenVidWriter,screenIm);
 
     end %for frame count
 
-    toc
     close(camVidWriter);
     close(screenVidWriter);
 end

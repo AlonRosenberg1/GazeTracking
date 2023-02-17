@@ -16,13 +16,8 @@ test07FileName = 'calibration\test_07.png';
 numHeadCalibPoints = 5;  %number of calibration point to calibrate head orientation
 numEyesCalibPoints = 11; %number of calib points to calib eyes orientation
 
-%{
-im = imread(test07FileName);
-imshow(im)
-%}
-%im = imread(headCalibFileName);
 
-%imshow(im)
+
 %head only part
 screenPoints(1,:) = [687 388];
 screenPoints(2,:) = [85 386];
@@ -30,8 +25,7 @@ screenPoints(3,:) = [1283 389];
 screenPoints(4,:) = [686 84];
 screenPoints(5,:) = [686 695];
 
-%im = imread(eyesCalibFileName);
-%imshow(im)
+
 %eyes only part
 screenPoints(6,:) = [89 84];
 screenPoints(7,:) = [520 85];

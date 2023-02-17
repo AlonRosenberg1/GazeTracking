@@ -13,7 +13,6 @@ if showImages
 end
 
 eyeBw=~im2bw(eyeIm,bwThreshold);
-%eyeBw = ~imbinarize(eyeIm,bwThreshold);
 if showImages
     figure(2)
     %subplot(212)

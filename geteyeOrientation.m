@@ -12,24 +12,6 @@ function [eyeOrientationX eyeOrientationY]  = geteyeOrientation(im,eyeBbox,isLef
 %for now - return orientation of number of pixel of center of pupile from upper right corner (for left eye. upper left
 %cornert for right eye)
 
-%% algorithm (1st draft):
-%step 0 - identify the sclera and pupile using segmentation, histogram (sclera should be whitest bunch of pixels) and
-%turn to BW
-%histogram methood doesnt work - color is too close to make saperation. choose edges instead
-%step 1 - isolate pupile/iris using morphological actions /other actions
-%step 2 - remove pupile from sclera to get only white sclera
-
-%step 3 - get contour of sclera - substruct the eroded with disk one from the filled sclera
-
-%think about reference the pupile center to another point in face
-
-%step 4 - calculate middle of pupile from left most point of contour
-
-%step 5 = calculate middle of pupile from upper most point of contour
-
-%% for debug 
-%eyeBbox = bbox(4,:); isLeftEye = 1
-%sanityCheckPixles = 5; %if the center of pupile is closer to edge than this number return -999 ("not found")
 
 sanityCheckPixles = globalParams.eyeOrientationSanityCheckPixles; %if the center of pupile is closer to edge than this number return -999 ("not found")
 notValid = globalParams.cantFindOrientationValue;
@@ -62,11 +44,6 @@ switch pupileDetectionMethood
         fudgeFactor = 0.5;
         eyeEdges = edge(eyeImGray,'sobel',threshold * fudgeFactor);
 
-        %{
-        figure(2)
-        imshow(eyeEdges);
-        %}
-
         %% open the edge picture to get filled contour of the eye
         Disk3 = strel('disk',3);
         tempEdges = imdilate(eyeEdges,Disk3);
@@ -74,10 +51,6 @@ switch pupileDetectionMethood
         %fill the contour
         edgesFilled = imfill(tempEdges,'holes');
 
-        %{
-        figure(3)
-        imshow(tempEdges)
-        %}
         if globalParams.debugShowEyePhoto
             figure(31)
             imshow(edgesFilled)
@@ -87,24 +60,13 @@ switch pupileDetectionMethood
         Disk1 = strel('disk',1);
         edgesFilled = imopen(edgesFilled,Disk1);
 
-        %{
-        figure(32)
-        imshow(edgesFilled)
-        %}
-
         %remove connection to edges
         edgesFilled(1,:) = 0;
         edgesFilled(imX,:) = 0;
         edgesFilled(:,1) = 0;
         edgesFilled(:,imY) = 0;
 
-        %{
-        figure(33)
-        imshow(edgesFilled)
-        %}
-
-
-
+       
         %% identify connected object and choose the one with the most area as the eye
         connectComp = bwconncomp(edgesFilled,4);
         %get largest object - the sclera&pupile
@@ -135,56 +97,7 @@ switch pupileDetectionMethood
 
         pupileOnly = imopen(scleraPupile,DiskIris);
 
-        %{
-        figure(5)
-        imshow(pupileOnly,[])
-        %}
-
-        %alternate way - via imfindcircles
-        %[centersDark, radiiDark] = imfindcircles(scleraPupile,[irisRadi-2 irisRadi+2],'ObjectPolarity','dark','Sensitivity',0.9);
-
-        %% draw elipse over the sclera
-        %{
-        scleraPupileBw = im2bw(scleraPupile);
-        imshow(scleraPupileBw)
-
-        s = regionprops(scleraPupileBw,'Centroid','MajorAxisLength','MinorAxisLength','Orientation','PixelList');
-
-        %for visualization
-        PixList = s(1).PixelList;
-
-        x = s(1).Centroid(1);
-        y = s(1).Centroid(2);
-        a = s(1).MajorAxisLength/2;
-        b = s(1).MinorAxisLength/2;
-        ori = s(1).Orientation;
-        steps = 50;
-
-        %#  @param x     X coordinate
-        %#  @param y     Y coordinate
-        %#  @param a     Semimajor axis
-        %#  @param b     Semiminor axis
-        %#  @param angle Angle of the ellipse (in degrees)
-
-        beta = ori * (pi / 180);
-        sinbeta = sin(beta);
-        cosbeta = cos(beta);
-
-        alpha = linspace(0, 360, steps)' .* (pi / 180);
-        sinalpha = sin(alpha);
-        cosalpha = cos(alpha);
-
-        X = x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta);
-        Y = y + (-a * cosalpha * sinbeta + b * sinalpha * cosbeta);
-
-        figure(5)
-        imshow(scleraPupile)
-        hold on
-        plot(X,Y,'k','LineWidth',2)
-        hold off
-
-        %}
-
+        
         %% estimate the real contur of sclera
         %for later phases in algor
 
@@ -197,7 +110,6 @@ switch pupileDetectionMethood
             figure(6)
             imshow(pupileBw)
         end
-        %first methood - via region props
 end %switch meathood of pupile detection
 
 s = regionprops(pupileBw,'Centroid','Area');
@@ -206,9 +118,6 @@ if ~isempty(s)
     [temp maxInd] = max(cat(1, s.Area));  %convert struct array to double array for Area
     
     pupileCenter = round(s(maxInd).Centroid);
-
-    %2nd methood - via find circles
-    %[centersDark, radiiDark] = imfindcircles(scleraPupile,[irisRadi-2 irisRadi+2],'Sensitivity',0.9);
 
     %% return orientation
     %number of pixels from upper right corner (imX,1) (for left eye)

@@ -19,12 +19,10 @@ numHeadCalibPoints = globalParams.numHeadCalibPoints;  %number of calibration po
 numEyesCalibPoints = globalParams.numEyesCalibPoints; %number of calib points to calib eyes orientation
 cantFindOri = globalParams.cantFindOrientationValue;
 
-%headDistance = zeros(1,numHeadCalibPoints);
 headDistance = zeros(1,numHeadCalibPoints+numEyesCalibPoints); %to do - switch them to scalar
 bothEyesDist = zeros(1,numHeadCalibPoints+numEyesCalibPoints); %to do - switch them to scalar
 totalOriDistance = zeros(1,numHeadCalibPoints+numEyesCalibPoints);
-%eyesDistanceLeft =  zeros(1,numEyesCalibPoints);
-%eyesDistanceRight =  zeros(1,numEyesCalibPoints);
+
 
 calibrationPointsOrientation = calibData.calibrationPointsOrientation;
 screenPointsCord = calibData.screenPointsCord;
@@ -49,7 +47,6 @@ currFrameex.rightEyeSize = bbox(globalParams.rightEyeBboxIndex,3)*bbox(globalPar
 
 
 if currHeadOri(1) == cantFindOri
-    %%to do - what happens if we cant find head
     tempGaze = [cantFindOri cantFindOri];
 else
     
@@ -107,11 +104,8 @@ else
                 end %if one eye is not detected
             end %xor 
             
-            
-            
     
             %%add the head and eyes dist
-             
             
         end %cant find both eyes
         
@@ -166,92 +160,6 @@ else
     %get wieghted mean
     relevantPointsCord = screenPointsCord(minInd,:); 
     tempGaze = weightedPointsMean(relevantPointsCord,minDist);
- 
-    
-%% alternative1: calc head's orientation distance for each head only calibration point
-%{
-    for ind = 1:numHeadCalibPoints
-        calibPointHeadOri = calibrationPointsOrientation{ind}.headOrientation;
-        if calibPointHeadOri(1) == cantFindOri
-            headDistance(ind) = intmax; %there is not head in <ind> calib point
-        else
-            headDistance(ind) = calcOrientationDistance(currHeadOri,calibPointHeadOri);
-        end
-    end %for head points
-
-%% take best <numberOfClosePoints> results
-    [minHeadDist minHeadInd] = sort(headDistance);
-    minHeadDist = minHeadDist(1:numberOfClosePoints);
-    minHeadInd = minHeadInd(1:numberOfClosePoints);
-
-%% calculate head baseline gaze
-relevantPointsCord = screenPointsCord(minHeadInd,:);
-headBaseGaze = weightedPointsMean(relevantPointsCord,minHeadDist);
-
-end %if we cant find head bbox
-
-currEyeOriLeft = currOrientation.leftEyeOrientation;
-currEyeOriRight = currOrientation.rightEyeOrientation;
-bothEyesDist = zeros(1,numEyesCalibPoints);
-
-if currEyeOriLeft(1)==cantFindOri && currEyeOriRight(1)==cantFindOri
-    %add logic of what to do if we cant find any eye in current frame
-else %we detect at least one eye in current frame
-    %calculate eyes distance to each calib point
-
-    for ind = numHeadCalibPoints+1:numEyesCalibPoints+numHeadCalibPoints
-        calibPointEyeOriLeft = calibrationPointsOrientation{ind}.leftEyeOrientation;
-        calibPointEyeOriRight = calibrationPointsOrientation{ind}.rightEyeOrientation;
-        
-        if calibPointEyeOriLeft(1) == cantFindOri || currEyeOriLeft(1)==cantFindOri
-            %eyesDistanceLeft(ind-numHeadCalibPoints) = intmax;
-            eyesDistanceLeft = cast(intmax,'double');
-        else
-            %eyesDistanceLeft(ind-numHeadCalibPoints) = calcOrientationDistance(currEyeOriLeft,calibPointEyeOriLeft);
-            eyesDistanceLeft = calcOrientationDistance(currEyeOriLeft,calibPointEyeOriLeft);
-        end
-        
-        if calibPointEyeOriRight(1) == cantFindOri || currEyeOriRight(1)==cantFindOri
-            %eyesDistanceRight(ind-numHeadCalibPoints) = intmax;
-            eyesDistanceRight = cast(intmax,'double');
-
-        else
-            %eyesDistanceRight(ind-numHeadCalibPoints) = calcOrientationDistance(currEyeOriRight,calibPointEyeOriRight);
-            eyesDistanceRight = calcOrientationDistance(currEyeOriRight,calibPointEyeOriRight);
-        end
-        
-        %add the distances from 2 eye to account for both eyes distance
-        %if one eye is not present for given calib use the distance for the other eye
-        %if both eyes are not present for given calib - use intmax (dont use this calib point)
-        
-        if xor(eyesDistanceLeft == intmax,eyesDistanceRight == intmax)
-            %only one of the eyes is detected - assume other eyes has same distance and add the values
-  
-            bothEyesDist(ind-numHeadCalibPoints) = 2.0*min(eyesDistanceRight,eyesDistanceLeft);
-            
-        else %either both eyes didnt detect or both eyes have valid value
-            if eyesDistanceRight == intmax %meaning both eyes didnt detec
-                bothEyesDist(ind-numHeadCalibPoints) = cast(intmax,'double');
-            else %meaning both eyes have valid value
-                bothEyesDist(ind-numHeadCalibPoints) = eyesDistanceRight+eyesDistanceLeft;
-                
-            end %if one eye is not detected
-        end %xor    
-    end%for eye calib points
-    
-    %choose minimum
-    [minEyeDist minEyeInd] = sort(bothEyesDist);
-    minEyeDist = minEyeDist(1:numberOfClosePoints);
-    minEyeInd = minEyeInd(1:numberOfClosePoints);
-    
-    %calculate eye adjustmen vector gaze
-    relevantPointsCord = screenPointsCord(minEyeInd+numHeadCalibPoints,:); %added numHeadPoints because screen point is concat
-    eyesTotalGaze = weightedPointsMean(relevantPointsCord,minEyeDist);
-    %convert total gaze (x,y) to relative to center offset vector
-    %eyesRelativeGaze;
-%}
-    
-    
   
     
 end %if we cant find any eye in frame

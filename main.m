@@ -2,7 +2,7 @@
 close all
 clear all
 
-%this program will implement a prototype of productivity tool
+%this program will implement a prototype of gaze tracker
 %algorithm 
 %1) do calibration for gaze detection (and if needed, the logic of interpeting the gaze)
 %2) while running:
@@ -36,9 +36,9 @@ end
 
 
 %% redo calibration if needed
-%{ %}
+
     captureCamVideo2File(globalParams);
-%}
+
 
 numHeadCalibPoints = globalParams.numHeadCalibPoints;
 
@@ -92,29 +92,7 @@ end %if realtime
 
 %% get calibration points orientation (from camera) and cordination (on screen)
 calibData.calibrationPointsOrientation = extractCalibOrientation(globalParams);
-%for debug
-%{
-notValid = globalParams.cantFindOrientationValue;
-for ind = 1:length(calibData.calibrationPointsOrientation)
-    if calibData.calibrationPointsOrientation{ind}.headOrientation(1,1)==notValid
-        faceDetected(ind) = 0;
-    else
-        faceDetected(ind) = 1;
-    end
-    
-    if calibData.calibrationPointsOrientation{ind}.leftEyeOrientation(1,1)==notValid
-        leftEyeDetected(ind) = 0;
-    else
-        leftEyeDetected(ind) = 1;
-    end
-    
-    if calibData.calibrationPointsOrientation{ind}.rightEyeOrientation(1,1)==notValid
-        rightEyeDetected(ind) = 0;
-    else
-        rightEyeDetected(ind) = 1;
-    end
-end
-%}
+
           
 calibData.screenPointsCord = getScreenPoints();
 %for debug
@@ -160,12 +138,7 @@ while hasFrameVideo
         end %if online gaze==1
     end %if is realtime
     
-    %imshow(im)
-    %% resize vid image to calibration size
-    if globalParams.resizeMovieToCalib == 1
-        %im = imresize(im,globalParams.calibImSize);
-        %imshow(im);
-    end
+    
     
     %for debug
     globalParams.currFrame = indFrame;
@@ -218,13 +191,7 @@ while hasFrameVideo
         dummyGaze = lastGaze;
         plotGazeResult(screenIm,dummyGaze,im,bbox,markLine,globalParams,outputShowHead,outMov);
     end
-    
-  
-    %% show results
-    %plotGazeResult(screenIm,gaze(indFrame,:),im,bbox,globalParams);
-    
-    
-    
+      
     indFrame = indFrame+1; %index for saving outputs
     %update hasframe
     if globalParams.isRealTime == 1
@@ -251,7 +218,6 @@ if globalParams.isRealTime ~= 1
 
     %calc error - distance between real points and my gaze
     testGaze = gaze(numHeadCalibPoints+globalParams.numEyesCalibPoints+1:end,:);
-    %diffDistance = sqrt(sum((testPoints - testGaze).^2,2))
     [diffDistance diffDistSquare] = calcTestLoss(testPoints,testGaze);
     meanDist = mean(diffDistance)
     meanSquareDist = mean(diffDistSquare) 

@@ -2,8 +2,6 @@ function calibrationPointsOrientation = extractOrientation(globalParams)
 
 %%this code will analyse the calibration images and output absoulte orientation for each caib photo
 
-%close all;
-%clear
 
 numHeadCalibPoints = globalParams.numHeadCalibPoints;  %number of calibration point to calibrate head orientation
 numEyesCalibPoints = globalParams.numEyesCalibPoints; %number of calib points to calib eyes orientation
@@ -13,16 +11,6 @@ headBaseName = globalParams.headBaseName;
 eyesBaseName = globalParams.eyesBaseName;
 calibFileType = globalParams.calibFileType;
 
-%% old params
-%{
-numHeadCalibPoints = 5;  %number of calibration point to calibrate head orientation
-numEyesCalibPoints = 11; %number of calib points to calib eyes orientation
-capturePicsAndNotVideo = true;
-
-headBaseName = 'calibration\calibration_images\headOnly';
-eyesBaseName = 'calibration\calibration_images\eyesOnly';
-calibFileType = '.png';
-%}
 
 %% detectors:
 numDetectors = 5;
@@ -38,7 +26,7 @@ end
 
 
 bbox = zeros(numDetectors,4);
-tic
+
 %dealing with head pictures
 for ind = 1:numHeadCalibPoints
      suffixName = sprintf('_%02d',ind); %suffix of the current calibration point name
@@ -47,11 +35,7 @@ for ind = 1:numHeadCalibPoints
      
      %detect face, eyes etc bbox
      bbox = detectFeature(im);
-     %{
-     imAnotate = insertObjectAnnotation(im,'rectangle',bbox,'');   
-     imshow(imAnotate)
-     %}
-     
+          
      %detect vertical and horizontal orientation of face, right eye and left eye
      %the orentation is defined as location of center of face bbox
      %for eye it is defined as number of pixels the pupile is away from nose bridge
@@ -74,20 +58,14 @@ for ind = 1:numEyesCalibPoints
      suffixName = sprintf('_%02d',ind); %suffix of the current calibration point name
      imName = sprintf('%s%s',eyesBaseName,suffixName,calibFileType);
      im = imread(imName);
-     %imshow(im)
-     
+    
      %detect face, eyes etc bbox
      bbox = detectFeature(im);
-     %{
-     imAnotate = insertObjectAnnotation(im,'rectangle',bbox,'');   
-     imshow(imAnotate)
-     %}
      
      %detect vertical and horizontal orientation of face, right eye and left eye
      %the orentation is defined as location of center of face bbox
      %for eye it is defined as number of pixels the pupile is away from nose bridge
      [tempOriX tempOriY] = getHeadOrientation(bbox);
-     %eyeCalibData{numHeadCalibPoints+ind}.headOrientation = [tempOriX tempOriY];
      headCalibData{numHeadCalibPoints+ind}.headOrientation = [tempOriX tempOriY];
     
      if ~isempty(bbox) 
@@ -98,4 +76,4 @@ for ind = 1:numEyesCalibPoints
      end
   
 end %for eye picture
-toc
+

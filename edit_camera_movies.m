@@ -7,40 +7,19 @@ screenShotFilename = 'calibration_points_printscreen.png';
 
 eye_only_movement = VideoReader('demo_confuse_long.mp4');
 eye_only_cropped = VideoWriter('twoLinesVideoShort460P','Uncompressed AVI');
-%{ 
-for demo
-eye_only_cropped = VideoWriter('demo_confuse_long_cropped','MPEG-4');
-eye_only_cropped.FrameRate = eye_only_movement.FrameRate;
-%}
+
 head_movement = VideoReader('cam_head_movement.mp4');
 head_movement_cropped = VideoWriter('cam_head_movement_cropped.mp4');
 
 %find start and end eye only
-%{
-frameInd = 0;
- while hasFrame(eye_only_movement)
-     im = readFrame(eye_only_movement);
-     imshow(im);
-     eye_only_movement.CurrentTime
-     frameInd = frameInd+1
-     pause
- end
-%}
+
 eyes_only_start = 1.4080;
 eyes_frameIndStart = 20;
 eyes_only_end = 10.2082;
 eyes_frameIndEnd = 153;
 eyesOnlyNumFrames = eyes_frameIndEnd-eyes_frameIndStart+1;
 
-%%find start and end with head movement
-% frameInd = 0;
-%  while hasFrame(head_movement)
-%      im = readFrame(head_movement);
-%      imshow(im);
-%      head_movement.CurrentTime
-%      frameInd = frameInd+1
-%      pause
-%  end
+
 head_movement_start = 6.4001;
 head_frameIndStart = 32;
 head_movement_end = 23.9039;
@@ -61,32 +40,11 @@ while frameInd < numFrames
     frameInd = frameInd + 1;
     im = readFrame(eye_only_movement);
     writeVideo(eye_only_cropped,im);
-    %im = readFrame(head_movement);
-    %writeVideo(head_movement_cropped,im);
+    
     
 end
 close(eye_only_cropped);
 close(head_movement_cropped);
-
-%%crop the eye movement video
-% 
-% eye_only_movement.CurrentTime = eyes_only_start;
-% open(eye_only_cropped);
-% while eye_only_movement.CurrentTime <= eyes_only_end
-%     im = readFrame(eye_only_movement);
-%     writeVideo(eye_only_cropped,im);
-% end
-% close(eye_only_cropped);
-
-%%crop the head movement video
-% head_movement.CurrentTime = head_movement_start;
-% open(head_movement_cropped);
-% while head_movement.CurrentTime <= head_movement_end
-%     im = readFrame(head_movement);
-%     writeVideo(head_movement_cropped,im);
-% end
-% close(head_movement_cropped);
-
 
 %% make movie from screenshot
 screenVidWriter = VideoWriter('screen.mp4');
